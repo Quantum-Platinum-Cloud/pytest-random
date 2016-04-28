@@ -1,3 +1,4 @@
+import hashlib
 from itertools import groupby
 from random import Random
 import time
@@ -34,9 +35,13 @@ def pytest_collection_modifyitems(session, config, items):
     the items in-place."""
     if not config.option.random:
         return
-    random = Random()
-    random.seed(config.option.random_seed)
-    random.shuffle(items)
+    
+    seed = str(config.option.random_seed)
+    def key(item):
+        return hashlib.sha1(seed + item.name).digest()
+
+    items.sort(key=key)
+    
     if not config.option.random_group:
         return
     groups = {}
